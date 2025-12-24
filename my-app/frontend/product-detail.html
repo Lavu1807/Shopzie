@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details - ME-SHOPZ</title>
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        var de=document.documentElement, b=document.body;
+        if(t==='dark'){ de.classList.add('dark'); de.removeAttribute('data-theme'); if(b) b.removeAttribute('data-theme'); de.style.colorScheme='dark'; }
+        else { de.classList.remove('dark'); de.setAttribute('data-theme','light'); if(b) b.setAttribute('data-theme','light'); de.style.colorScheme='light'; }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .product-detail-container { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-2xl); margin: var(--spacing-2xl) 0; }
+    .product-gallery { display: flex; flex-direction: column; gap: var(--spacing-lg); }
+    .main-image { width: 100%; aspect-ratio: 1; background: #f0f0f0; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 100px; }
+    .product-info h1 { margin-bottom: 8px; }
+    .product-meta { display: flex; gap: var(--spacing-lg); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; }
+    .meta-label { color: var(--gray); font-size: var(--font-size-sm); }
+    .meta-value { font-size: var(--font-size-lg); font-weight: 600; }
+    .rating-section { margin-bottom: var(--spacing-lg); }
+    .rating-section .stars { font-size: 20px; }
+    .price-section { background: #f8f9fa; padding: var(--spacing-lg); border-radius: var(--border-radius); margin-bottom: var(--spacing-lg); }
+    .price-display { display: flex; gap: var(--spacing-md); align-items: baseline; }
+    .price-current { font-size: 32px; font-weight: bold; color: var(--primary); }
+    .price-original { font-size: 20px; color: var(--gray); text-decoration: line-through; }
+    .quantity-selector { display: flex; gap: 12px; align-items: center; margin-bottom: var(--spacing-lg); }
+    .quantity-selector input { width: 80px; }
+    .action-buttons { display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .description { margin-bottom: var(--spacing-2xl); }
+    .description h3 { margin-bottom: var(--spacing-md); }
+    .specs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); }
+    .spec-item { padding: var(--spacing-lg); background: #f8f9fa; border-radius: var(--border-radius); }
+    .spec-label { color: var(--gray); font-size: var(--font-size-sm); }
+    .spec-value { font-weight: 600; }
+    .reviews-section { margin-top: var(--spacing-2xl); border-top: 1px solid var(--gray-light); padding-top: var(--spacing-2xl); }
+    .review-card { padding: var(--spacing-lg); border-bottom: 1px solid var(--gray-light); }
+    .review-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .review-author { font-weight: 600; }
+    .review-date { color: var(--gray); font-size: var(--font-size-sm); }
+    @media (max-width: 768px) {
+      .product-detail-container { grid-template-columns: 1fr; }
+      .action-buttons { grid-template-columns: 1fr; }
+      .price-current { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div style="margin: var(--spacing-lg) 0;">
+      <a href="/" style="color: var(--primary);">← Back to Products</a>
+    </div>
+
+    <div id="loadingState">
+      <div class="flex-center" style="min-height: 400px;">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <div id="productContent" class="hidden">
+      <div class="product-detail-container">
+        <!-- Gallery -->
+        <div class="product-gallery">
+          <div class="main-image" id="mainImage">🖼️</div>
+          <p style="text-align: center; color: var(--gray); font-size: var(--font-size-sm);">Images loading...</p>
+        </div>
+
+        <!-- Info -->
+        <div class="product-info">
+          <h1 id="productName">Product Name</h1>
+
+          <div class="product-meta">
+            <div class="meta-item">
+              <span class="meta-label">Seller</span>
+              <span class="meta-value" id="sellerName">TechStore</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Stock</span>
+              <span class="meta-value" id="stockStatus">In Stock</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Rating</span>
+              <span class="meta-value">
+                <span id="ratingStars">⭐⭐⭐⭐⭐</span> <span id="ratingCount">(128)</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="price-section">
+            <div class="price-display">
+              <span class="price-current" id="priceDiscount">$59.99</span>
+              <span class="price-original" id="priceOriginal" style="display: none;">$79.99</span>
+            </div>
+            <p style="color: var(--success); font-size: var(--font-size-sm); margin-top: 8px;">
+              Save <span id="savingAmount">$20</span> (<span id="savingPercent">25%</span>)
+            </p>
+          </div>
+
+          <div class="quantity-selector">
+            <label>Quantity:</label>
+            <input type="number" id="quantity" value="1" min="1" max="10">
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-primary btn-lg" id="addCartBtn" onclick="addToCart()">🛒 Add to Cart</button>
+            <button class="btn btn-outline btn-lg" id="wishlistBtn" onclick="toggleWishlist()">❤️ Save</button>
+          </div>
+
+          <!-- Product Description -->
+          <div class="description">
+            <h3>Description</h3>
+            <p id="productDescription">
+              Premium wireless headphones with active noise cancellation, 30-hour battery life, and premium sound quality.
+            </p>
+          </div>
+
+          <!-- Specifications -->
+          <div>
+            <h3>Specifications</h3>
+            <div class="specs" id="specsContainer">
+              <div class="spec-item">
+                <div class="spec-label">Brand</div>
+                <div class="spec-value" id="specBrand">TechBrand</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-label">Color</div>
+                <div class="spec-value" id="specColor">Black</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-label">Warranty</div>
+                <div class="spec-value" id="specWarranty">2 Years</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-label">Shipping</div>
+                <div class="spec-value" id="specShipping">Free</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="reviews-section">
+        <h2>Customer Reviews</h2>
+        <div id="reviewsContainer">
+          <div class="review-card">
+            <div class="review-header">
+              <span class="review-author">John Doe ⭐⭐⭐⭐⭐</span>
+              <span class="review-date">2 days ago</span>
+            </div>
+            <p>Excellent product! Very satisfied with the quality.</p>
+          </div>
+          <div class="review-card">
+            <div class="review-header">
+              <span class="review-author">Jane Smith ⭐⭐⭐⭐</span>
+              <span class="review-date">1 week ago</span>
+            </div>
+            <p>Good quality, fast delivery. Highly recommend!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/utils.js"></script>
+  <script src="js/validators.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+
+    // Mock product data
+    const mockProduct = {
+      id: 1,
+      name: 'Premium Wireless Headphones',
+      seller: 'TechStore',
+      price: 79.99,
+      discountPrice: 59.99,
+      rating: 4.5,
+      reviews: 128,
+      stock: 25,
+      image: '🎧',
+      description: 'Premium wireless headphones with active noise cancellation, 30-hour battery life, Bluetooth 5.0, and premium sound quality. Perfect for music lovers and professionals.',
+      specifications: {
+        brand: 'AudioPro',
+        color: 'Matte Black',
+        warranty: '2 Years',
+        shipping: 'Free',
+        model: 'AP-2000',
+        frequency: '20Hz-20kHz'
+      }
+    };
+
+    async function loadProduct() {
+      try {
+        const result = await apiGet(`/products/${productId}`);
+        if (result.success) {
+          displayProduct(result.data);
+        }
+      } catch {
+        displayProduct(mockProduct);
+      }
+    }
+
+    function displayProduct(product) {
+      el('#mainImage').textContent = product.image;
+      setText('#productName', product.name);
+      setText('#sellerName', product.seller);
+      setText('#productDescription', product.description);
+      
+      const discount = Math.round(((product.price - product.discountPrice) / product.price) * 100);
+      setText('#priceDiscount', formatPrice(product.discountPrice || product.price));
+      if (product.discountPrice) {
+        setText('#priceOriginal', formatPrice(product.price));
+        show('#priceOriginal');
+        setText('#savingAmount', formatPrice(product.price - product.discountPrice));
+        setText('#savingPercent', discount + '%');
+      }
+
+      const stars = '⭐'.repeat(Math.floor(product.rating));
+      setText('#ratingStars', stars);
+      setText('#ratingCount', `(${product.reviews})`);
+      setText('#stockStatus', product.stock > 0 ? `${product.stock} in stock` : 'Out of stock');
+
+      Object.entries(product.specifications || {}).forEach(([key, value]) => {
+        const el_spec = el(`#spec${key.charAt(0).toUpperCase() + key.slice(1)}`);
+        if (el_spec) setText(el_spec, value);
+      });
+
+      el('#quantity').max = product.stock;
+      hide('#loadingState');
+      show('#productContent');
+    }
+
+    function addToCart() {
+      const quantity = parseInt(el('#quantity').value);
+      const cart = Storage.get('cart') || [];
+      const existingItem = cart.find(item => item.id === parseInt(productId));
+
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        cart.push({
+          ...mockProduct,
+          id: parseInt(productId),
+          quantity
+        });
+      }
+
+      Storage.set('cart', cart);
+      showAlert(`Added ${quantity} item(s) to cart!`, 'success');
+      Navbar.updateCartCount();
+    }
+
+    function toggleWishlist() {
+      const wishlist = Storage.get('wishlist') || [];
+      const index = wishlist.indexOf(parseInt(productId));
+      const btn = el('#wishlistBtn');
+
+      if (index > -1) {
+        wishlist.splice(index, 1);
+        showAlert('Removed from wishlist', 'info');
+        removeClass(btn, 'btn-primary');
+        addClass(btn, 'btn-outline');
+      } else {
+        wishlist.push(parseInt(productId));
+        showAlert('Added to wishlist', 'success');
+        addClass(btn, 'btn-primary');
+        removeClass(btn, 'btn-outline');
+      }
+
+      Storage.set('wishlist', wishlist);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadProduct);
+    } else {
+      loadProduct();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - Me-Shopz</title>
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        var de=document.documentElement, b=document.body;
+        if(t==='dark'){ de.classList.add('dark'); de.removeAttribute('data-theme'); if(b) b.removeAttribute('data-theme'); de.style.colorScheme='dark'; }
+        else { de.classList.remove('dark'); de.setAttribute('data-theme','light'); if(b) b.setAttribute('data-theme','light'); de.style.colorScheme='light'; }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .cart-container {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .cart-items {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      gap: 20px;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      align-items: start;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-item-image {
+      width: 100px;
+      height: 100px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      flex-shrink: 0;
+    }
+
+    .cart-item-details h3 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
+    }
+
+    .cart-item-seller {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .cart-item-price {
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .cart-item-original-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 10px 0;
+    }
+
+    .quantity-control button {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quantity-control button:hover {
+      background: #f5f5f5;
+    }
+
+    .quantity-control input {
+      width: 50px;
+      text-align: center;
+      border: 1px solid #ddd;
+      padding: 5px;
+      border-radius: 4px;
+    }
+
+    .cart-item-actions {
+      text-align: right;
+    }
+
+    .remove-btn {
+      color: var(--danger);
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: underline;
+      padding: 5px;
+    }
+
+    .remove-btn:hover {
+      opacity: 0.8;
+    }
+
+    .summary {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 20px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .summary-total {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 15px 0;
+      color: var(--primary);
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-cart-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+
+    .empty-cart h2 {
+      color: #999;
+      margin-bottom: 20px;
+    }
+
+    .continue-shopping {
+      display: inline-block;
+      margin-top: 20px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .checkout-btn:hover {
+      opacity: 0.9;
+    }
+
+    .checkout-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .free-shipping-badge {
+      background: var(--success);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 14px;
+    }
+
+    .back-button:hover {
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .cart-container {
+        grid-template-columns: 1fr;
+      }
+
+      .cart-item {
+        grid-template-columns: 80px 1fr;
+        gap: 15px;
+      }
+
+      .cart-item-image {
+        width: 80px;
+        height: 80px;
+        font-size: 30px;
+      }
+
+      .cart-item-actions {
+        grid-column: 1 / -1;
+        text-align: left;
+        margin-top: 10px;
+      }
+
+      .summary {
+        position: static;
+        margin-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="back-button" onclick="goBack()">← Back to Shopping</div>
+
+    <h1>Shopping Cart</h1>
+
+    <div id="cartContent">
+      <div class="cart-container">
+        <div class="cart-items" id="cartItems">
+          <!-- Cart items will be rendered here -->
+        </div>
+
+        <div class="summary" id="cartSummary">
+          <!-- Summary will be rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <div id="emptyCart" class="empty-cart" style="display: none;">
+      <div class="empty-cart-icon">🛒</div>
+      <h2>Your cart is empty</h2>
+      <p>Add some items to get started!</p>
+      <a href="index.html" class="btn btn-primary continue-shopping">Continue Shopping</a>
+    </div>
+  </div>
+
+  <!-- Footer will be injected here -->
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/validators.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script src="js/cart-service.js"></script>
+
+  <script>
+    // Page initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCart()
+      setupEventListeners()
+
+      // Listen for cart updates from other pages
+      window.addEventListener('cartUpdated', loadCart)
+    })
+
+    /**
+     * Load and display cart
+     */
+    function loadCart() {
+      const items = cartService.getLocalCart()
+
+      if (items.length === 0) {
+        showEmptyCart()
+        return
+      }
+
+      renderCartItems(items)
+      renderSummary()
+      hideEmptyCart()
+    }
+
+    /**
+     * Render cart items
+     */
+    function renderCartItems(items) {
+      const container = document.getElementById('cartItems')
+      
+      const html = items.map(item => `
+        <div class="cart-item">
+          <div class="cart-item-image">${item.image}</div>
+          <div class="cart-item-details">
+            <h3>${item.name}</h3>
+            <div class="cart-item-seller">Sold by: ${item.seller}</div>
+            <div class="cart-item-price">
+              $${(item.discountPrice || item.price).toFixed(2)}
+              ${item.price > item.discountPrice ? `<span class="cart-item-original-price">$${item.price.toFixed(2)}</span>` : ''}
+            </div>
+            <div class="quantity-control">
+              <button onclick="decrementQuantity('${item.id}')">−</button>
+              <input type="number" id="qty-${item.id}" value="${item.quantity}" min="1" max="${item.stock}" 
+                     onchange="updateQuantity('${item.id}', this.value)">
+              <button onclick="incrementQuantity('${item.id}')">+</button>
+            </div>
+          </div>
+          <div class="cart-item-actions">
+            <div style="font-weight: bold; margin-bottom: 10px;">
+              $${((item.discountPrice || item.price) * item.quantity).toFixed(2)}
+            </div>
+            <button class="remove-btn" onclick="removeItem('${item.id}')">Remove</button>
+          </div>
+        </div>
+      `).join('')
+
+      container.innerHTML = html
+    }
+
+    /**
+     * Render order summary
+     */
+    function renderSummary() {
+      const summary = cartService.calculateSummary()
+      const savings = cartService.calculateSavings()
+      const container = document.getElementById('cartSummary')
+
+      const html = `
+        <h3 style="margin-top: 0;">Order Summary</h3>
+        <div class="summary-item">
+          <span>Subtotal (${summary.itemCount} items)</span>
+          <span>$${summary.subtotal.toFixed(2)}</span>
+        </div>
+        ${savings > 0 ? `
+          <div class="summary-item">
+            <span>Savings</span>
+            <span style="color: var(--success);">-$${savings.toFixed(2)}</span>
+          </div>
+        ` : ''}
+        <div class="summary-item">
+          <span>Shipping</span>
+          <span>${summary.shipping === 0 ? 'FREE' : '$' + summary.shipping.toFixed(2)}</span>
+        </div>
+        ${summary.shipping === 0 ? '<div class="free-shipping-badge">🎉 Free Shipping!</div>' : ''}
+        <div class="summary-item">
+          <span>Tax (10%)</span>
+          <span>$${summary.tax.toFixed(2)}</span>
+        </div>
+        <div class="summary-total">
+          <span>Total: $${summary.total.toFixed(2)}</span>
+        </div>
+        <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+        <button class="btn btn-outline" style="width: 100%; margin-top: 10px;" onclick="continueShopping()">
+          Continue Shopping
+        </button>
+      `
+
+      container.innerHTML = html
+    }
+
+    /**
+     * Increment item quantity
+     */
+    async function incrementQuantity(itemId) {
+      const input = document.getElementById(`qty-${itemId}`)
+      const newQuantity = parseInt(input.value) + 1
+      await updateQuantity(itemId, newQuantity)
+    }
+
+    /**
+     * Decrement item quantity
+     */
+    async function decrementQuantity(itemId) {
+      const input = document.getElementById(`qty-${itemId}`)
+      const newQuantity = Math.max(1, parseInt(input.value) - 1)
+      await updateQuantity(itemId, newQuantity)
+    }
+
+    /**
+     * Update item quantity
+     */
+    async function updateQuantity(itemId, newQuantity) {
+      const items = cartService.getLocalCart()
+      const item = items.find(i => i.id === itemId)
+
+      if (!item) return
+
+      newQuantity = Math.max(1, Math.min(newQuantity, item.stock))
+
+      if (window.isLoggedIn && window.isLoggedIn()) {
+        // Sync with backend
+        const result = await cartService.updateBackendCartItem(itemId, newQuantity)
+        if (!result.success && !result.local) {
+          showAlert('Failed to update cart', 'danger')
+          return
+        }
+      } else {
+        // Update local only
+        cartService.updateLocalCartItem(itemId, newQuantity)
+      }
+
+      loadCart()
+      showAlert('Quantity updated', 'success')
+    }
+
+    /**
+     * Remove item from cart
+     */
+    async function removeItem(itemId) {
+      const items = cartService.getLocalCart()
+      const item = items.find(i => i.id === itemId)
+
+      if (!confirm(`Remove ${item.name} from cart?`)) {
+        return
+      }
+
+      if (window.isLoggedIn && window.isLoggedIn()) {
+        const result = await cartService.removeFromBackendCart(itemId)
+        if (!result.success && !result.local) {
+          showAlert('Failed to remove item', 'danger')
+          return
+        }
+      } else {
+        cartService.removeFromLocalCart(itemId)
+      }
+
+      loadCart()
+      showAlert('Item removed from cart', 'success')
+    }
+
+    /**
+     * Show empty cart state
+     */
+    function showEmptyCart() {
+      document.getElementById('cartContent').style.display = 'none'
+      document.getElementById('emptyCart').style.display = 'block'
+    }
+
+    /**
+     * Hide empty cart state
+     */
+    function hideEmptyCart() {
+      document.getElementById('cartContent').style.display = 'block'
+      document.getElementById('emptyCart').style.display = 'none'
+    }
+
+    /**
+     * Proceed to checkout
+     */
+    async function checkout() {
+      if (!window.isLoggedIn || !window.isLoggedIn()) {
+        showAlert('Please log in to checkout', 'info')
+        window.location.href = 'login.html?redirect=checkout'
+        return
+      }
+
+      // Validate cart
+      const validation = await cartService.validateCart()
+      if (!validation.isValid) {
+        validation.errors.forEach(error => {
+          showAlert(error, 'danger')
+        })
+        return
+      }
+
+      // Redirect to checkout page
+      window.location.href = 'checkout.html'
+    }
+
+    /**
+     * Continue shopping
+     */
+    function continueShopping() {
+      window.location.href = 'index.html'
+    }
+
+    /**
+     * Go back to previous page
+     */
+    function goBack() {
+      window.history.back()
+    }
+
+    /**
+     * Setup event listeners
+     */
+    function setupEventListeners() {
+      // Cart updated from other pages
+      window.addEventListener('cartUpdated', (e) => {
+        console.log('Cart updated:', e.detail)
+        loadCart()
+      })
+    }
+
+    /**
+     * Utility: Show alert (placeholder)
+     */
+    function showAlert(message, type = 'info') {
+      console.log(`[${type.toUpperCase()}] ${message}`)
+      // You can implement a toast notification here
+      const colors = {
+        success: '#27ae60',
+        danger: '#e74c3c',
+        info: '#3498db',
+        warning: '#f39c12'
+      }
+      const alert = document.createElement('div')
+      alert.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${colors[type]};
+        color: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+      `
+      alert.textContent = message
+      document.body.appendChild(alert)
+      setTimeout(() => alert.remove(), 3000)
+    }
+
+    // Add animation
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    `
+    document.head.appendChild(style)
+  </script>
+</body>
+</html>

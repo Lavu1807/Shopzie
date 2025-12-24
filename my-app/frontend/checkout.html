@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Me-Shopz</title>
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        var de=document.documentElement, b=document.body;
+        if(t==='dark'){ de.classList.add('dark'); de.removeAttribute('data-theme'); if(b) b.removeAttribute('data-theme'); de.style.colorScheme='dark'; }
+        else { de.classList.remove('dark'); de.setAttribute('data-theme','light'); if(b) b.setAttribute('data-theme','light'); de.style.colorScheme='light'; }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .checkout-container {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .checkout-form {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .form-section {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .form-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .form-section h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-row.full {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .order-summary {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 20px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .summary-total {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 15px 0;
+      color: var(--primary);
+    }
+
+    .place-order-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .place-order-btn:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .place-order-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .security-info {
+      background: #f0f8ff;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #333;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .order-items {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .order-item-mini {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 13px;
+    }
+
+    .error-message {
+      background: #fee;
+      color: var(--danger);
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      border-left: 4px solid var(--danger);
+    }
+
+    @media (max-width: 768px) {
+      .checkout-container {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .order-summary {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Checkout</h1>
+
+    <div id="checkoutError" class="error-message" style="display: none;">
+      <!-- Error message here -->
+    </div>
+
+    <div class="checkout-container">
+      <form id="checkoutForm" class="checkout-form">
+        <!-- Shipping Information -->
+        <div class="form-section">
+          <h3>📍 Shipping Address</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" name="firstName" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" name="lastName" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Address *</label>
+            <input type="text" name="address" placeholder="Street address" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>City *</label>
+              <input type="text" name="city" required>
+            </div>
+            <div class="form-group">
+              <label>State/Province *</label>
+              <input type="text" name="state" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Postal Code *</label>
+              <input type="text" name="postalCode" required>
+            </div>
+            <div class="form-group">
+              <label>Country *</label>
+              <input type="text" name="country" value="United States" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" name="phone" required>
+          </div>
+        </div>
+
+        <!-- Shipping Method -->
+        <div class="form-section">
+          <h3>🚚 Shipping Method</h3>
+          
+          <div class="form-group">
+            <input type="radio" id="standard" name="shipping" value="standard" checked>
+            <label for="standard" style="display: inline; margin-left: 5px;">
+              Standard Shipping (5-7 business days) - FREE
+            </label>
+          </div>
+
+          <div class="form-group">
+            <input type="radio" id="express" name="shipping" value="express">
+            <label for="express" style="display: inline; margin-left: 5px;">
+              Express Shipping (2-3 business days) - $20
+            </label>
+          </div>
+
+          <div class="form-group">
+            <input type="radio" id="overnight" name="shipping" value="overnight">
+            <label for="overnight" style="display: inline; margin-left: 5px;">
+              Overnight Shipping (Next day) - $50
+            </label>
+          </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="form-section">
+          <h3>💳 Payment Method</h3>
+          
+          <div class="form-group">
+            <label>Cardholder Name *</label>
+            <input type="text" name="cardName" required>
+          </div>
+
+          <div class="form-group">
+            <label>Card Number *</label>
+            <input type="text" name="cardNumber" placeholder="1234 5678 9012 3456" 
+                   maxlength="19" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Expiry Date *</label>
+              <input type="text" name="expiry" placeholder="MM/YY" maxlength="5" required>
+            </div>
+            <div class="form-group">
+              <label>CVV *</label>
+              <input type="text" name="cvv" placeholder="123" maxlength="4" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Notes -->
+        <div class="form-section">
+          <h3>📝 Order Notes (Optional)</h3>
+          
+          <div class="form-group">
+            <label>Add special instructions</label>
+            <textarea name="notes" rows="3" placeholder="Special requests, delivery notes, etc."></textarea>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="form-section">
+          <div class="form-group">
+            <input type="checkbox" id="terms" name="terms" required>
+            <label for="terms" style="display: inline; margin-left: 5px;">
+              I agree to the Terms & Conditions and Privacy Policy
+            </label>
+          </div>
+        </div>
+      </form>
+
+      <div class="order-summary">
+        <h3 style="margin-top: 0;">Order Summary</h3>
+        
+        <div class="order-items" id="orderItems">
+          <!-- Order items will be loaded here -->
+        </div>
+
+        <div class="summary-item">
+          <span>Subtotal</span>
+          <span id="summarySubtotal">$0.00</span>
+        </div>
+
+        <div class="summary-item">
+          <span>Shipping</span>
+          <span id="summaryShipping">Free</span>
+        </div>
+
+        <div class="summary-item">
+          <span>Tax (10%)</span>
+          <span id="summaryTax">$0.00</span>
+        </div>
+
+        <div class="summary-total">
+          <span>Total: <span id="summaryTotal">$0.00</span></span>
+        </div>
+
+        <button type="submit" form="checkoutForm" class="place-order-btn" id="placeOrderBtn">
+          Place Order
+        </button>
+
+        <div class="security-info">
+          🔒 Your payment information is secure and encrypted
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/validators.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script src="js/cart-service.js"></script>
+
+  <script>
+    let shippingCost = 0
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check authentication
+      if (typeof isLoggedIn !== 'undefined' && !isLoggedIn()) {
+        window.location.href = 'login.html?redirect=checkout'
+        return
+      }
+
+      loadCheckout()
+      setupFormHandlers()
+    })
+
+    /**
+     * Load checkout with cart items and summary
+     */
+    function loadCheckout() {
+      const cart = cartService.getLocalCart()
+
+      if (cart.length === 0) {
+        showError('Your cart is empty. Please add items before checkout.')
+        document.getElementById('checkoutForm').style.display = 'none'
+        document.getElementById('placeOrderBtn').style.display = 'none'
+        return
+      }
+
+      renderOrderItems(cart)
+      updateSummary()
+    }
+
+    /**
+     * Render order items in summary
+     */
+    function renderOrderItems(items) {
+      const container = document.getElementById('orderItems')
+      
+      const html = items.map(item => `
+        <div class="order-item-mini">
+          <span>${item.name} × ${item.quantity}</span>
+          <span>$${((item.discountPrice || item.price) * item.quantity).toFixed(2)}</span>
+        </div>
+      `).join('')
+
+      container.innerHTML = html
+    }
+
+    /**
+     * Update order summary
+     */
+    function updateSummary() {
+      const summary = cartService.calculateSummary()
+      
+      // Calculate shipping cost
+      const shippingMethod = document.querySelector('input[name="shipping"]:checked')?.value
+      shippingCost = 0
+      if (shippingMethod === 'express') shippingCost = 20
+      if (shippingMethod === 'overnight') shippingCost = 50
+
+      const subtotal = summary.subtotal
+      const tax = (subtotal + shippingCost) * 0.1
+      const total = subtotal + shippingCost + tax
+
+      document.getElementById('summarySubtotal').textContent = `$${subtotal.toFixed(2)}`
+      document.getElementById('summaryShipping').textContent = 
+        shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`
+      document.getElementById('summaryTax').textContent = `$${tax.toFixed(2)}`
+      document.getElementById('summaryTotal').textContent = `$${total.toFixed(2)}`
+    }
+
+    /**
+     * Setup form event handlers
+     */
+    function setupFormHandlers() {
+      const form = document.getElementById('checkoutForm')
+      
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        await handleCheckout()
+      })
+
+      // Update summary when shipping method changes
+      document.querySelectorAll('input[name="shipping"]').forEach(radio => {
+        radio.addEventListener('change', updateSummary)
+      })
+
+      // Format card number
+      document.querySelector('input[name="cardNumber"]').addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim()
+      })
+
+      // Format expiry date
+      document.querySelector('input[name="expiry"]').addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').replace(/(\d{2})/, '$1/').slice(0, 5)
+      })
+    }
+
+    /**
+     * Handle checkout submission
+     */
+    async function handleCheckout() {
+      hideError()
+
+      // Validate form
+      const form = document.getElementById('checkoutForm')
+      if (!form.checkValidity()) {
+        form.reportValidity()
+        return
+      }
+
+      // Validate cart
+      const validation = await cartService.validateCart()
+      if (!validation.isValid) {
+        validation.errors.forEach(error => showError(error))
+        return
+      }
+
+      // Get form data
+      const formData = new FormData(form)
+      const orderData = cartService.getOrderData()
+
+      const checkoutData = {
+        shippingAddress: {
+          firstName: formData.get('firstName'),
+          lastName: formData.get('lastName'),
+          address: formData.get('address'),
+          city: formData.get('city'),
+          state: formData.get('state'),
+          postalCode: formData.get('postalCode'),
+          country: formData.get('country'),
+          phone: formData.get('phone')
+        },
+        shippingMethod: formData.get('shipping'),
+        payment: {
+          method: 'credit_card',
+          cardName: formData.get('cardName'),
+          cardNumber: maskCardNumber(formData.get('cardNumber')),
+          expiry: formData.get('expiry')
+        },
+        items: orderData.items,
+        subtotal: orderData.subtotal,
+        shippingCost: shippingCost,
+        tax: orderData.tax,
+        totalAmount: orderData.subtotal + shippingCost + orderData.tax,
+        notes: formData.get('notes'),
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+
+      // Show loading
+      const btn = document.getElementById('placeOrderBtn')
+      const originalText = btn.textContent
+      btn.disabled = true
+      btn.textContent = 'Processing...'
+
+      try {
+        // Submit order to backend (if available)
+        if (window.API_BASE_URL) {
+          const token = localStorage.getItem('token')
+          const response = await fetch(window.API_BASE_URL + '/orders', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(checkoutData)
+          })
+
+          const result = await response.json()
+          
+          if (result.success) {
+            // Clear cart
+            cartService.clearLocalCart()
+            
+            // Store order confirmation
+            sessionStorage.setItem('orderConfirmation', JSON.stringify(result.order))
+            
+            // Redirect to confirmation
+            window.location.href = `order-confirmation.html?orderId=${result.order._id}`
+            return
+          } else {
+            throw new Error(result.message || 'Order failed')
+          }
+        } else {
+          // Demo mode: Save order locally and redirect
+          sessionStorage.setItem('orderConfirmation', JSON.stringify(checkoutData))
+          cartService.clearLocalCart()
+          window.location.href = 'order-confirmation.html'
+        }
+      } catch (error) {
+        console.error('Checkout error:', error)
+        showError(error.message || 'Failed to place order. Please try again.')
+        btn.disabled = false
+        btn.textContent = originalText
+      }
+    }
+
+    /**
+     * Mask card number for display
+     */
+    function maskCardNumber(cardNumber) {
+      const cleaned = cardNumber.replace(/\s/g, '')
+      return '*'.repeat(cleaned.length - 4) + cleaned.slice(-4)
+    }
+
+    /**
+     * Show error message
+     */
+    function showError(message) {
+      const errorDiv = document.getElementById('checkoutError')
+      errorDiv.textContent = message
+      errorDiv.style.display = 'block'
+      errorDiv.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    /**
+     * Hide error message
+     */
+    function hideError() {
+      document.getElementById('checkoutError').style.display = 'none'
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - ME-SHOPZ</title>
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        var de=document.documentElement, b=document.body;
+        if(t==='dark'){ de.classList.add('dark'); de.removeAttribute('data-theme'); if(b) b.removeAttribute('data-theme'); de.style.colorScheme='dark'; }
+        else { de.classList.remove('dark'); de.setAttribute('data-theme','light'); if(b) b.setAttribute('data-theme','light'); de.style.colorScheme='light'; }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .auth-container { max-width: 450px; margin: 40px auto; padding: var(--spacing-md); }
+    .auth-card { background: white; padding: var(--spacing-2xl); border-radius: var(--border-radius); box-shadow: var(--box-shadow-lg); }
+    .auth-card h1 { text-align: center; margin-bottom: 8px; }
+    .auth-card > p { text-align: center; color: var(--gray); margin-bottom: var(--spacing-lg); }
+    .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .role-card { padding: var(--spacing-lg); border: 2px solid var(--gray-light); border-radius: var(--border-radius); cursor: pointer; text-align: center; }
+    .role-card.active { border-color: var(--primary); background-color: rgba(52,152,219,0.1); }
+    .role-card h3 { margin: 0; font-size: var(--font-size-base); }
+    .role-card p { margin: 4px 0 0 0; font-size: var(--font-size-sm); color: var(--gray); }
+    .form-group label { margin-bottom: 8px; }
+    .form-group input { width: 100%; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .strength-meter { margin-top: 4px; }
+    .submit-btn { width: 100%; margin-top: var(--spacing-lg); }
+    .login-link { text-align: center; margin-top: var(--spacing-lg); font-size: var(--font-size-sm); }
+    .login-link a { color: var(--primary); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>Create Account</h1>
+      <p>Join ME-SHOPZ today</p>
+
+      <!-- Role Selection -->
+      <div style="margin-bottom: var(--spacing-lg);">
+        <label>I want to sign up as:</label>
+        <div class="role-selector">
+          <div class="role-card active" onclick="selectRole('customer', this)">
+            <h3>🛍️ Customer</h3>
+            <p>Shop products</p>
+          </div>
+          <div class="role-card" onclick="selectRole('shopkeeper', this)">
+            <h3>🏪 Shopkeeper</h3>
+            <p>Sell products</p>
+          </div>
+        </div>
+      </div>
+
+      <form id="signupForm">
+        <input type="hidden" id="role" name="role" value="customer">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Doe" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Min 8 characters" required>
+          <div class="strength-meter" id="strengthMeter"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+        </div>
+
+        <!-- Shopkeeper Fields (Hidden by default) -->
+        <div id="shopkeeperFields" style="display: none;">
+          <div class="form-group">
+            <label for="shopName">Shop Name</label>
+            <input type="text" id="shopName" name="shopName" placeholder="My Awesome Shop">
+          </div>
+          <div class="form-group">
+            <label for="businessLicense">Business License Number</label>
+            <input type="text" id="businessLicense" name="businessLicense" placeholder="BL123456">
+          </div>
+        </div>
+
+        <label style="display: flex; align-items: start; gap: 8px; margin-bottom: var(--spacing-lg); font-size: var(--font-size-sm);">
+          <input type="checkbox" id="terms" name="terms" required style="margin-top: 2px;">
+          <span>I agree to the <a href="#terms" style="color: var(--primary);">Terms & Conditions</a></span>
+        </label>
+
+        <button type="submit" class="btn btn-primary submit-btn">Create Account</button>
+      </form>
+
+      <div class="login-link">
+        Already have an account? <a href="/login.html">Login here</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/validators.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script>
+    if (isLoggedIn()) window.location.href = '/';
+
+    let selectedRole = 'customer';
+    const strengthMeter = new PasswordStrengthMeter('#password', '#strengthMeter');
+    const form = el('#signupForm');
+    const validator = new FormValidator(form);
+
+    validator.addRule('firstName', v => Validators.required(v), 'First name required');
+    validator.addRule('lastName', v => Validators.required(v), 'Last name required');
+    validator.addRule('email', v => Validators.email(v), 'Valid email required');
+    validator.addRule('phone', v => Validators.required(v), 'Phone required');
+    validator.addRule('password', v => Validators.password(v), 'Password must be 8+ characters');
+    validator.addRule('confirmPassword', v => Validators.passwordMatch(el('#password').value, v), 'Passwords do not match');
+    validator.addRule('terms', v => el('#terms').checked, 'Accept terms to continue');
+
+    function selectRole(role, element) {
+      selectedRole = role;
+      el('#role').value = role;
+      elAll('.role-card').forEach(el => removeClass(el, 'active'));
+      addClass(element, 'active');
+      
+      if (role === 'shopkeeper') {
+        show('#shopkeeperFields');
+      } else {
+        hide('#shopkeeperFields');
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validator.validate()) return;
+
+      const data = getFormData(form);
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
+      const signupData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        role: selectedRole
+      };
+
+      if (selectedRole === 'shopkeeper') {
+        signupData.shopName = data.shopName;
+        signupData.businessLicense = data.businessLicense;
+      }
+
+      const result = await apiPost('/auth/signup', signupData);
+
+      if (result.success) {
+        localStorage.setItem('token', result.data.token);
+        localStorage.setItem('user', JSON.stringify(result.data.user));
+        showAlert('Account created successfully!', 'success');
+        setTimeout(() => {
+          window.location.href = selectedRole === 'shopkeeper' ? '/dashboard.html' : '/';
+        }, 1500);
+      } else {
+        showAlert(result.error || 'Signup failed', 'danger');
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    });
+  </script>
+</body>
+</html>

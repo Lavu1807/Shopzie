@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - ME-SHOPZ</title>
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        var de=document.documentElement, b=document.body;
+        if(t==='dark'){ de.classList.add('dark'); de.removeAttribute('data-theme'); if(b) b.removeAttribute('data-theme'); de.style.colorScheme='dark'; }
+        else { de.classList.remove('dark'); de.setAttribute('data-theme','light'); if(b) b.setAttribute('data-theme','light'); de.style.colorScheme='light'; }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .dashboard { display: grid; grid-template-columns: 200px 1fr; gap: var(--spacing-lg); margin: var(--spacing-xl) 0; }
+    .sidebar { background: white; padding: var(--spacing-lg); border-radius: var(--border-radius); height: fit-content; box-shadow: var(--box-shadow); }
+    .sidebar ul { list-style: none; }
+    .sidebar li { margin-bottom: 8px; }
+    .sidebar a { display: block; padding: 10px; border-radius: 4px; color: var(--dark); transition: var(--transition); }
+    .sidebar a:hover { background: #f0f0f0; color: var(--primary); }
+    .sidebar a.active { background: var(--primary); color: white; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); }
+    .stat-card { background: white; padding: var(--spacing-lg); border-radius: var(--border-radius); box-shadow: var(--box-shadow); }
+    .stat-icon { font-size: 32px; margin-bottom: 8px; }
+    .stat-label { color: var(--gray); font-size: var(--font-size-sm); margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: bold; color: var(--primary); }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #f8f9fa; padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--gray-light); }
+    .data-table td { padding: 12px; border-bottom: 1px solid var(--gray-light); }
+    .data-table tr:hover { background: #f8f9fa; }
+    .action-buttons { display: flex; gap: 8px; }
+    .action-buttons .btn { padding: 4px 8px; font-size: 12px; }
+    .section { background: white; padding: var(--spacing-lg); border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-bottom: var(--spacing-lg); }
+    .section h2 { margin-top: 0; }
+    @media (max-width: 768px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: var(--spacing-xl) 0;">
+      <h1 style="margin: 0;">Seller Dashboard</h1>
+      <a href="/add-product.html" class="btn btn-primary">+ Add Product</a>
+    </div>
+
+    <div class="dashboard">
+      <!-- Sidebar -->
+      <nav class="sidebar">
+        <ul>
+          <li><a href="#overview" class="nav-link active" onclick="switchTab('overview')">📊 Overview</a></li>
+          <li><a href="#products" class="nav-link" onclick="switchTab('products')">📦 Products</a></li>
+          <li><a href="#orders" class="nav-link" onclick="switchTab('orders')">📋 Orders</a></li>
+          <li><a href="#analytics" class="nav-link" onclick="switchTab('analytics')">📈 Analytics</a></li>
+          <li><a href="#settings" class="nav-link" onclick="switchTab('settings')">⚙️ Settings</a></li>
+        </ul>
+      </nav>
+
+      <!-- Main Content -->
+      <div>
+        <!-- Overview Section -->
+        <div id="overview-section" class="tab-content">
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-icon">📦</div>
+              <div class="stat-label">Total Products</div>
+              <div class="stat-value" id="totalProducts">12</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📊</div>
+              <div class="stat-label">Total Orders</div>
+              <div class="stat-value" id="totalOrders">45</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div class="stat-label">Revenue</div>
+              <div class="stat-value" id="totalRevenue">$2,450</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">⭐</div>
+              <div class="stat-label">Avg Rating</div>
+              <div class="stat-value" id="avgRating">4.8</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>Recent Orders</h2>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrders">
+                <tr>
+                  <td>#ORD001</td>
+                  <td>John Doe</td>
+                  <td>$149.99</td>
+                  <td><span class="badge badge-success">Delivered</span></td>
+                  <td>2 days ago</td>
+                  <td><button class="btn btn-sm btn-primary">View</button></td>
+                </tr>
+                <tr>
+                  <td>#ORD002</td>
+                  <td>Jane Smith</td>
+                  <td>$89.99</td>
+                  <td><span class="badge badge-info">Processing</span></td>
+                  <td>1 day ago</td>
+                  <td><button class="btn btn-sm btn-primary">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Products Section -->
+        <div id="products-section" class="tab-content hidden">
+          <div class="section">
+            <h2>My Products</h2>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Rating</th>
+                  <th>Sales</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsList">
+                <tr>
+                  <td>Wireless Headphones</td>
+                  <td>$59.99</td>
+                  <td>25</td>
+                  <td>⭐⭐⭐⭐⭐ (128)</td>
+                  <td>156</td>
+                  <td>
+                    <div class="action-buttons">
+                      <a href="/edit-product.html?id=1" class="btn btn-sm btn-primary">Edit</a>
+                      <button class="btn btn-sm btn-danger" onclick="deleteProduct(1)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders-section" class="tab-content hidden">
+          <div class="section">
+            <h2>All Orders</h2>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="ordersList">
+                <tr>
+                  <td>#ORD001</td>
+                  <td>John Doe</td>
+                  <td>2 items</td>
+                  <td>$149.99</td>
+                  <td><span class="badge badge-success">Delivered</span></td>
+                  <td>2025-01-15</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics-section" class="tab-content hidden">
+          <div class="section">
+            <h2>Sales Analytics</h2>
+            <p style="color: var(--gray); text-align: center; padding: var(--spacing-2xl);">
+              📊 Analytics dashboard coming soon
+            </p>
+          </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings-section" class="tab-content hidden">
+          <div class="section">
+            <h2>Shop Settings</h2>
+            <form id="settingsForm">
+              <div class="form-group">
+                <label for="shopName">Shop Name</label>
+                <input type="text" id="shopName" value="Tech Store" />
+              </div>
+              <div class="form-group">
+                <label for="shopDesc">Shop Description</label>
+                <textarea id="shopDesc" placeholder="Describe your shop"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/utils.js"></script>
+  <script src="js/validators.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script>
+    requireRole('shopkeeper');
+
+    function switchTab(tab) {
+      // Hide all sections
+      elAll('.tab-content').forEach(el => hide(el));
+      
+      // Hide all nav links
+      elAll('.nav-link').forEach(el => removeClass(el, 'active'));
+      
+      // Show selected section
+      const section = el(`#${tab}-section`);
+      if (section) show(section);
+      
+      // Activate nav link
+      elAll('.nav-link').forEach(el => {
+        if (el.href.includes(tab)) addClass(el, 'active');
+      });
+    }
+
+    function deleteProduct(id) {
+      if (!confirm('Delete this product?')) return;
+      showAlert('Product deleted', 'success');
+    }
+
+    el('#settingsForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      showAlert('Settings saved', 'success');
+    });
+
+    // Load dashboard data
+    async function loadDashboard() {
+      // In production, fetch from API
+      // const result = await apiGet('/sellers/dashboard');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadDashboard);
+    } else {
+      loadDashboard();
+    }
+  </script>
+</body>
+</html>

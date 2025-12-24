@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ME-SHOPZ - Home</title>
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        var de=document.documentElement, b=document.body;
+        if(t==='dark'){ de.classList.add('dark'); de.removeAttribute('data-theme'); if(b) b.removeAttribute('data-theme'); de.style.colorScheme='dark'; }
+        else { de.classList.remove('dark'); de.setAttribute('data-theme','light'); if(b) b.setAttribute('data-theme','light'); de.style.colorScheme='light'; }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/me-shopz.scoped.css">
+  <style>
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: var(--spacing-2xl) var(--spacing-md);
+      text-align: center;
+      margin-bottom: var(--spacing-2xl);
+    }
+    .hero h1 { color: white; font-size: 48px; margin-bottom: var(--spacing-lg); }
+    .hero p { color: rgba(255,255,255,0.9); font-size: var(--font-size-lg); margin-bottom: var(--spacing-lg); }
+    .filters { background-color: white; padding: var(--spacing-lg); border-radius: var(--border-radius); margin-bottom: var(--spacing-lg); display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--spacing-md); }
+    .filters select { width: 100%; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--gray-light); border-radius: var(--border-radius); }
+    .product-card { background: white; border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--box-shadow); cursor: pointer; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: var(--box-shadow-lg); }
+    .product-image { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; }
+    .product-badge { position: absolute; top: 8px; right: 8px; background: var(--danger); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .product-body { padding: var(--spacing-lg); }
+    .product-name { font-size: var(--font-size-lg); font-weight: 600; margin-bottom: 4px; }
+    .product-seller { color: var(--gray); font-size: var(--font-size-sm); margin-bottom: 8px; }
+    .product-rating { display: flex; gap: 4px; margin-bottom: 8px; }
+    .product-price { display: flex; gap: 8px; margin-bottom: var(--spacing-lg); }
+    .price-current { font-size: var(--font-size-lg); font-weight: bold; color: var(--primary); }
+    .price-original { text-decoration: line-through; color: var(--gray); }
+    .product-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .pagination { display: flex; justify-content: center; gap: 8px; margin-top: var(--spacing-2xl); }
+    .pagination button { padding: 8px 12px; border: 1px solid var(--gray-light); background: white; border-radius: 4px; cursor: pointer; }
+    .pagination button.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .empty-state { text-align: center; padding: var(--spacing-2xl); }
+    @media (max-width: 768px) {
+      .filters { grid-template-columns: 1fr; }
+      .product-actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="container">
+      <h1>Welcome to ME-SHOPZ</h1>
+      <p>Discover amazing products from trusted sellers</p>
+      <button class="btn btn-light" onclick="document.getElementById('productsContainer').scrollIntoView()">Shop Now</button>
+    </div>
+  </section>
+
+  <main class="container">
+    <div class="filters">
+      <select id="categoryFilter" onchange="applyFilters()">
+        <option value="">All Categories</option>
+        <option value="electronics">Electronics</option>
+        <option value="clothing">Clothing</option>
+        <option value="books">Books</option>
+        <option value="home">Home & Garden</option>
+      </select>
+      <select id="priceFilter" onchange="applyFilters()">
+        <option value="">All Prices</option>
+        <option value="0-50">$0 - $50</option>
+        <option value="50-100">$50 - $100</option>
+        <option value="100-500">$100 - $500</option>
+        <option value="500+">$500+</option>
+      </select>
+      <select id="sortFilter" onchange="applyFilters()">
+        <option value="newest">Newest</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="rating">Highest Rated</option>
+      </select>
+      <button class="btn btn-primary" onclick="resetFilters()" style="width: 100%;">Reset</button>
+    </div>
+
+    <h2 style="margin-top: 24px;">Products <span id="productCount">(0)</span></h2>
+
+    <div class="grid grid-3" id="productsContainer"></div>
+    <div class="empty-state hidden" id="emptyState">
+      <h3>No products found</h3>
+      <button class="btn btn-primary" onclick="resetFilters()">Clear Filters</button>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </main>
+
+  <!-- Modern scoped section (non-intrusive) -->
+  <div class="msz">
+    <section class="section">
+      <div class="container">
+        <h2>Fresh Picks</h2>
+        <p class="muted mb-4">A taste of the new Me‑Shopz design system.</p>
+        <div class="grid cols-2 md:cols-3 lg:cols-4">
+          <article class="product-card animate-slide-up">
+            <div class="product-media">
+              <span class="product-badge">New</span>
+              <img src="https://via.placeholder.com/640x480" alt="Featured product 1" />
+            </div>
+            <div class="product-body">
+              <h3 class="product-title">Aurora Wireless Headphones</h3>
+              <p class="product-desc">Immersive sound • 30h battery • ANC</p>
+              <div class="product-meta">
+                <span class="product-price">$129</span>
+                <span class="product-rating">★ 4.7</span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-ghost" type="button">Wishlist</button>
+              <button class="btn btn-primary" type="button">Add to Cart</button>
+            </div>
+          </article>
+
+          <article class="product-card animate-slide-up">
+            <div class="product-media">
+              <span class="product-badge">Sale</span>
+              <img src="https://via.placeholder.com/640x480" alt="Featured product 2" />
+            </div>
+            <div class="product-body">
+              <h3 class="product-title">Lumen Desk Lamp</h3>
+              <p class="product-desc">Dimmable • USB‑C • Matte finish</p>
+              <div class="product-meta">
+                <span class="product-price">$42</span>
+                <span class="product-rating">★ 4.5</span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-ghost" type="button">Wishlist</button>
+              <button class="btn btn-primary" type="button">Add to Cart</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/validators.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script>
+    let allProducts = [], filteredProducts = [], currentPage = 1, productsPerPage = 9;
+
+    async function initPage() {
+      await loadProducts();
+      displayProducts();
+    }
+
+    async function loadProducts() {
+      try {
+        const result = await apiGet('/products');
+        allProducts = result.data?.products || [];
+      } catch {
+        allProducts = [
+          {id:1,name:'Wireless Headphones',seller:'TechStore',price:79.99,discountPrice:59.99,rating:4.5,reviews:128,category:'electronics',image:'🎧'},
+          {id:2,name:'Blue T-Shirt',seller:'FashionHub',price:29.99,discountPrice:19.99,rating:4.2,reviews:45,category:'clothing',image:'👕'},
+          {id:3,name:'JavaScript Book',seller:'BookWorld',price:39.99,discountPrice:29.99,rating:4.8,reviews:256,category:'books',image:'📚'},
+          {id:4,name:'USB-C Cable',seller:'TechStore',price:12.99,discountPrice:9.99,rating:4.4,reviews:89,category:'electronics',image:'🔌'},
+          {id:5,name:'Plant Pot',seller:'HomeDecor',price:24.99,discountPrice:19.99,rating:4.3,reviews:67,category:'home',image:'🪴'},
+          {id:6,name:'Running Shoes',seller:'SportGear',price:99.99,discountPrice:79.99,rating:4.6,reviews:134,category:'clothing',image:'👟'},
+          {id:7,name:'Camera Tripod',seller:'PhotoPro',price:49.99,discountPrice:39.99,rating:4.7,reviews:98,category:'electronics',image:'📷'},
+          {id:8,name:'Desk Lamp',seller:'HomeDecor',price:34.99,discountPrice:24.99,rating:4.4,reviews:76,category:'home',image:'💡'},
+          {id:9,name:'Python Guide',seller:'BookWorld',price:44.99,discountPrice:34.99,rating:4.9,reviews:312,category:'books',image:'📖'}
+        ];
+      }
+      filteredProducts = [...allProducts];
+    }
+
+    function applyFilters() {
+      const category = el('#categoryFilter')?.value || '';
+      const priceRange = el('#priceFilter')?.value || '';
+      const sortBy = el('#sortFilter')?.value || 'newest';
+
+      filteredProducts = allProducts.filter(p => {
+        if (category && p.category !== category) return false;
+        if (priceRange) {
+          const price = p.discountPrice || p.price;
+          if (priceRange === '0-50' && price > 50) return false;
+          if (priceRange === '50-100' && (price < 50 || price > 100)) return false;
+          if (priceRange === '100-500' && (price < 100 || price > 500)) return false;
+          if (priceRange === '500+' && price < 500) return false;
+        }
+        return true;
+      });
+
+      if (sortBy === 'price-low') filteredProducts.sort((a,b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+      else if (sortBy === 'price-high') filteredProducts.sort((a,b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+      else if (sortBy === 'rating') filteredProducts.sort((a,b) => b.rating - a.rating);
+
+      currentPage = 1;
+      updateProductCount();
+      displayProducts();
+    }
+
+    function displayProducts() {
+      const container = el('#productsContainer');
+      const emptyState = el('#emptyState');
+
+      if (filteredProducts.length === 0) {
+        hide(container);
+        show(emptyState);
+        setHTML('#pagination', '');
+        return;
+      }
+
+      show(container);
+      hide(emptyState);
+
+      const start = (currentPage - 1) * productsPerPage;
+      const end = start + productsPerPage;
+      const pageProducts = filteredProducts.slice(start, end);
+
+      const html = pageProducts.map(p => {
+        const discount = Math.round(((p.price - p.discountPrice) / p.price) * 100);
+        const stars = '⭐'.repeat(Math.floor(p.rating)) + '✨'.repeat(p.rating % 1 > 0 ? 1 : 0);
+        return `
+          <div class="product-card" onclick="window.location.href='/product-detail.html?id=${p.id}'">
+            <div class="product-image">${p.image}${discount > 0 ? `<div class="product-badge">${discount}% OFF</div>` : ''}</div>
+            <div class="product-body">
+              <h3 class="product-name">${p.name.substring(0, 30)}</h3>
+              <p class="product-seller">By ${p.seller}</p>
+              <div class="product-rating">${stars} (${p.reviews})</div>
+              <div class="product-price">
+                <span class="price-current">${formatPrice(p.discountPrice || p.price)}</span>
+                ${p.discountPrice ? `<span class="price-original">${formatPrice(p.price)}</span>` : ''}
+              </div>
+              <div class="product-actions">
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); addToCart(${p.id})">🛒 Add</button>
+                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); toggleWishlist(${p.id})">❤️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      setHTML(container, html);
+
+      const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+      let paginationHTML = '';
+      for (let i = 1; i <= totalPages; i++) {
+        paginationHTML += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+      }
+      setHTML('#pagination', paginationHTML);
+    }
+
+    function addToCart(id) {
+      const product = allProducts.find(p => p.id === id);
+      if (!product) return;
+      const cart = Storage.get('cart') || [];
+      const existing = cart.find(item => item.id === id);
+      if (existing) existing.quantity++;
+      else cart.push({...product, quantity: 1});
+      Storage.set('cart', cart);
+      showAlert(`${product.name} added to cart!`, 'success');
+      Navbar.updateCartCount();
+    }
+
+    function toggleWishlist(id) {
+      const wishlist = Storage.get('wishlist') || [];
+      const index = wishlist.indexOf(id);
+      if (index > -1) {
+        wishlist.splice(index, 1);
+        showAlert('Removed from wishlist', 'info');
+      } else {
+        wishlist.push(id);
+        showAlert('Added to wishlist', 'success');
+      }
+      Storage.set('wishlist', wishlist);
+    }
+
+    function resetFilters() {
+      el('#categoryFilter').value = '';
+      el('#priceFilter').value = '';
+      el('#sortFilter').value = 'newest';
+      applyFilters();
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      displayProducts();
+      document.documentElement.scrollTop = 0;
+    }
+
+    function updateProductCount() {
+      setText('#productCount', `(${filteredProducts.length})`);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage);
+    else initPage();
+  </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmation - Me-Shopz</title>
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('theme');
+        if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+        var de=document.documentElement, b=document.body;
+        if(t==='dark'){ de.classList.add('dark'); de.removeAttribute('data-theme'); if(b) b.removeAttribute('data-theme'); de.style.colorScheme='dark'; }
+        else { de.classList.remove('dark'); de.setAttribute('data-theme','light'); if(b) b.setAttribute('data-theme','light'); de.style.colorScheme='light'; }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .confirmation-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .confirmation-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    .confirmation-title {
+      color: var(--success);
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .confirmation-message {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .order-number {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+    .order-details {
+      text-align: left;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .order-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .order-detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .order-detail-label {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .order-detail-value {
+      text-align: right;
+    }
+
+    .order-items {
+      text-align: left;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .order-items h4 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+
+    .item-qty {
+      color: #999;
+      margin-left: 10px;
+    }
+
+    .next-steps {
+      background: #e8f4f8;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .next-steps h4 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .next-steps ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .next-steps li {
+      margin: 8px 0;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons a,
+    .action-buttons button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: var(--primary);
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #efefef;
+    }
+
+    .contact-info {
+      background: #fff5f5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 30px;
+      font-size: 14px;
+    }
+
+    .contact-info strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .confirmation-container {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      .order-detail-row {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .order-detail-value {
+        text-align: left;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons a,
+      .action-buttons button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="confirmation-container">
+    <div class="confirmation-icon">✅</div>
+    
+    <h1 class="confirmation-title">Order Confirmed!</h1>
+    
+    <p class="confirmation-message">
+      Thank you for your purchase! Your order has been successfully placed and is being processed.
+    </p>
+
+    <div class="order-number">
+      Order #: <span id="orderNumber">-</span>
+    </div>
+
+    <div class="order-details">
+      <div class="order-detail-row">
+        <span class="order-detail-label">Status:</span>
+        <span class="order-detail-value"><span id="orderStatus">Pending</span> ⏳</span>
+      </div>
+      <div class="order-detail-row">
+        <span class="order-detail-label">Date:</span>
+        <span class="order-detail-value" id="orderDate">-</span>
+      </div>
+      <div class="order-detail-row">
+        <span class="order-detail-label">Shipping To:</span>
+        <span class="order-detail-value" id="orderAddress">-</span>
+      </div>
+      <div class="order-detail-row">
+        <span class="order-detail-label">Estimated Delivery:</span>
+        <span class="order-detail-value" id="estimatedDelivery">5-7 business days</span>
+      </div>
+      <div class="order-detail-row">
+        <span class="order-detail-label" style="font-size: 16px; font-weight: 600;">Total Amount:</span>
+        <span class="order-detail-value" style="font-size: 16px; font-weight: 600; color: var(--primary);" id="orderTotal">-</span>
+      </div>
+    </div>
+
+    <div class="order-items" id="orderItemsSection" style="display: none;">
+      <h4>Order Items</h4>
+      <div id="orderItems"></div>
+    </div>
+
+    <div class="next-steps">
+      <h4>📬 What Happens Next</h4>
+      <ol>
+        <li><strong>Order Confirmation:</strong> Check your email for order confirmation and tracking number</li>
+        <li><strong>Processing:</strong> We're preparing your items for shipment (1-2 business days)</li>
+        <li><strong>Shipping:</strong> Your package will be shipped and you'll receive tracking updates</li>
+        <li><strong>Delivery:</strong> Track your order and receive it at your doorstep</li>
+      </ol>
+    </div>
+
+    <div class="action-buttons">
+      <a href="index.html" class="btn-secondary">← Continue Shopping</a>
+      <a href="orders.html" class="btn-primary">📦 View Orders</a>
+    </div>
+
+    <div class="contact-info">
+      <strong>Questions about your order?</strong>
+      <p>
+        📧 support@me-shopz.com<br>
+        📞 1-800-SHOPZ-1<br>
+        💬 Chat with us anytime at me-shopz.com/chat
+      </p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/theme-toggle.js" defer></script>
+  <script src="js/cart-service.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadOrderConfirmation()
+    })
+
+    /**
+     * Load and display order confirmation
+     */
+    function loadOrderConfirmation() {
+      // Get order from session storage or URL params
+      let order = null
+
+      // Try URL params (from backend redirect)
+      const params = new URLSearchParams(window.location.search)
+      const orderId = params.get('orderId')
+
+      // Try session storage (from local checkout)
+      const savedOrder = sessionStorage.getItem('orderConfirmation')
+
+      if (savedOrder) {
+        try {
+          order = JSON.parse(savedOrder)
+        } catch (e) {
+          console.error('Failed to parse order:', e)
+        }
+      }
+
+      if (!order && !orderId) {
+        // No order found - might have navigated here directly
+        showDemoOrder()
+        return
+      }
+
+      displayOrder(order || { _id: orderId })
+    }
+
+    /**
+     * Display order details
+     */
+    function displayOrder(order) {
+      const orderId = order._id || order.id || generateOrderId()
+      const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
+
+      // Set order number
+      document.getElementById('orderNumber').textContent = orderId.substring(0, 12).toUpperCase()
+      document.getElementById('orderDate').textContent = orderDate
+      document.getElementById('orderStatus').textContent = order.status || 'Pending'
+
+      // Set shipping address
+      if (order.shippingAddress) {
+        const addr = order.shippingAddress
+        document.getElementById('orderAddress').textContent = 
+          `${addr.city}, ${addr.state} ${addr.postalCode}`
+      } else {
+        document.getElementById('orderAddress').textContent = 'Delivery address on file'
+      }
+
+      // Set estimated delivery
+      const shippingDays = {
+        express: '2-3 business days',
+        overnight: 'Next business day',
+        standard: '5-7 business days'
+      }
+      const method = order.shippingMethod || 'standard'
+      document.getElementById('estimatedDelivery').textContent = shippingDays[method] || '5-7 business days'
+
+      // Set total amount
+      const total = order.totalAmount || order.total || 0
+      document.getElementById('orderTotal').textContent = `$${parseFloat(total).toFixed(2)}`
+
+      // Display items if available
+      if (order.items && order.items.length > 0) {
+        displayOrderItems(order.items)
+      }
+    }
+
+    /**
+     * Display order items
+     */
+    function displayOrderItems(items) {
+      const section = document.getElementById('orderItemsSection')
+      const container = document.getElementById('orderItems')
+
+      const html = items.map(item => `
+        <div class="item">
+          <span>${item.product?.name || item.name || 'Product'}</span>
+          <span>
+            $${parseFloat(item.price || 0).toFixed(2)}
+            <span class="item-qty">×${item.quantity || 1}</span>
+          </span>
+        </div>
+      `).join('')
+
+      container.innerHTML = html
+      section.style.display = 'block'
+    }
+
+    /**
+     * Show demo order for testing
+     */
+    function showDemoOrder() {
+      document.getElementById('orderNumber').textContent = 'ME' + Math.random().toString(36).substring(7).toUpperCase()
+      document.getElementById('orderDate').textContent = new Date().toLocaleDateString()
+      document.getElementById('orderStatus').textContent = 'Pending'
+      document.getElementById('orderAddress').textContent = 'San Francisco, CA 94105'
+      document.getElementById('orderTotal').textContent = '$199.98'
+    }
+
+    /**
+     * Generate random order ID
+     */
+    function generateOrderId() {
+      return 'ORD-' + Date.now() + '-' + Math.random().toString(36).substring(7)
+    }
+
+    // Clear session storage
+    sessionStorage.removeItem('orderConfirmation')
+  </script>
+</body>
+</html>
