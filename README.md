@@ -452,13 +452,13 @@ Contributions are welcome! Please follow these steps:
 
 **Lavanya Verma**
 - GitHub: [@Lavu1807](https://github.com/Lavu1807)
-- Email: lav@gmail.com
+- Email: lavu18072006@gmail.com
 
 ---
 
 ## 📞 Support
 
-For support, email lav@gmail.com or open an issue on GitHub.
+For support, email lavuverma18072006@gmail.com or open an issue on GitHub.
 
 ---
 
