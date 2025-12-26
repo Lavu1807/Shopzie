@@ -4,16 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [switchingRole, setSwitchingRole] = useState(false);
@@ -21,7 +14,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("accessToken");
-      
+
       if (!token) {
         router.push("/login");
         return;
@@ -58,7 +51,9 @@ export default function DashboardPage() {
     router.push("/");
   };
 
-  const handleSwitchRole = async (newRole: string) => {
+  const handleSwitchRole = async (newRole) => {
+    if (!newRole) return;
+
     setSwitchingRole(true);
     const token = localStorage.getItem("accessToken");
 
@@ -80,8 +75,9 @@ export default function DashboardPage() {
       setUser(data.user);
       setShowRoleModal(false);
       alert(`✅ Successfully switched to ${newRole}!`);
-    } catch (error: any) {
-      alert(`Error: ${error.message}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to switch role";
+      alert(`Error: ${message}`);
     } finally {
       setSwitchingRole(false);
     }
@@ -227,7 +223,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Switch Account Type</h2>
             <p className="text-gray-600 mb-6">
-              You are currently a <span className="font-semibold capitalize">{user?.role}</span>. 
+              You are currently a <span className="font-semibold capitalize">{user?.role}</span>.
               Switch to become a <span className="font-semibold capitalize">{user?.role === "customer" ? "shopkeeper" : "customer"}</span>?
             </p>
 

@@ -4,22 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  stock: number;
-  images?: string[];
-  shopkeeper: {
-    name: string;
-  };
-}
-
 export default function ProductsPage() {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,23 +19,24 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/products");
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
 
       const data = await response.json();
       setProducts(data.products || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to fetch products";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const addToCart = async (productId: string) => {
+  const addToCart = async (productId) => {
     const token = localStorage.getItem("accessToken");
-    
+
     if (!token) {
       router.push("/login");
       return;
@@ -72,8 +60,9 @@ export default function ProductsPage() {
       }
 
       alert("Product added to cart!");
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to add to cart";
+      alert(message);
     }
   };
 
@@ -84,9 +73,14 @@ export default function ProductsPage() {
   };
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = category === "all" || product.category === category;
+    const name = product.name || "";
+    const description = product.description || "";
+    const productCategory = product.category || "";
+
+    const matchesSearch =
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = category === "all" || productCategory === category;
     return matchesSearch && matchesCategory;
   });
 
@@ -147,7 +141,7 @@ export default function ProductsPage() {
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    {cat?.charAt(0)?.toUpperCase() + cat?.slice(1)}
                   </option>
                 ))}
               </select>
@@ -200,7 +194,7 @@ export default function ProductsPage() {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                       {product.description}
                     </p>
-                    
+
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-2xl font-bold text-indigo-600">
                         ${product.price.toFixed(2)}

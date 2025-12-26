@@ -4,28 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface CartItem {
-  product: {
-    _id: string;
-    name: string;
-    price: number;
-  };
-  quantity: number;
-}
-
-interface Cart {
-  items: CartItem[];
-  totalItems: number;
-  totalPrice: number;
-}
-
 export default function CheckoutPage() {
   const router = useRouter();
-  const [cart, setCart] = useState<Cart | null>(null);
+  const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  
+
   const [formData, setFormData] = useState({
     street: "",
     city: "",
@@ -41,7 +26,7 @@ export default function CheckoutPage() {
 
   const fetchCart = async () => {
     const token = localStorage.getItem("accessToken");
-    
+
     if (!token) {
       router.push("/login");
       return;
@@ -59,21 +44,22 @@ export default function CheckoutPage() {
       }
 
       const data = await response.json();
-      
+
       if (!data.cart || data.cart.items.length === 0) {
         router.push("/cart");
         return;
       }
 
       setCart(data.cart);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to fetch cart";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError("");
@@ -104,11 +90,12 @@ export default function CheckoutPage() {
         throw new Error(data.message || "Failed to place order");
       }
 
-      const data = await response.json();
+      await response.json();
       alert("Order placed successfully!");
       router.push("/orders");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to place order";
+      setError(message);
     } finally {
       setSubmitting(false);
     }

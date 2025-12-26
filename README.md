@@ -48,7 +48,7 @@ A full-stack e-commerce marketplace platform that enables multiple sellers (shop
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Next.js 16** - React framework with TypeScript
+- **Next.js 16** - React framework using JavaScript (`.jsx`)
 - **React 19** - UI library
 - **Tailwind CSS 4** - Utility-first CSS framework
 - **Lucide React** - Icon library
@@ -126,7 +126,7 @@ npm install
 cd my-app/backend
 npm install
 
-# Install frontend dependencies
+# Install Next.js app dependencies
 cd ../
 npm install
 ```
@@ -165,13 +165,22 @@ npm start
 ```bash
 cd my-app
 npm run dev
-# Frontend runs on http://localhost:3000
+# Dev server defaults to http://localhost:3000
+# If 3000 is busy, Next.js will use an open port (e.g. 3001).
+# Watch the terminal output for the exact URL.
 ```
 
 3. **Access the application**
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3000 (or http://localhost:3001 if auto-switched)
 - API: http://localhost:5000/api
 - Health Check: http://localhost:5000/api/health
+
+#### Notes
+- If you see a warning about multiple lockfiles and an inferred workspace root, you can silence it by setting `turbopack.root` in `my-app/next.config.js` or by keeping a single `package-lock.json` at the intended root.
+- If signup/login shows "Failed to fetch":
+  - Ensure the backend is running at port 5000.
+  - Confirm you are visiting the exact frontend URL printed by `npm run dev`.
+  - CORS is configured to allow `http://localhost:3000` and `http://localhost:3001` by default.
 
 ---
 

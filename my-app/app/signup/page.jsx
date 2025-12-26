@@ -16,7 +16,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -34,28 +34,27 @@ export default function SignupPage() {
           email,
           password,
           confirmPassword,
-          role: role,
+          role,
         }),
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
-        // Handle validation errors
         if (data.errors && Array.isArray(data.errors)) {
-          const errorMessages = data.errors.map((err: any) => err.message).join(", ");
+          const errorMessages = data.errors.map((err) => err.message).join(", ");
           throw new Error(errorMessages);
         }
         throw new Error(data.message || "Signup failed");
       }
 
       setSuccess(true);
-      // Redirect to login after 2 seconds
       setTimeout(() => {
         window.location.href = "/login";
       }, 2000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Signup failed";
+      setError(message);
     } finally {
       setLoading(false);
     }

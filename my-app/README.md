@@ -1,6 +1,6 @@
-# Me-Shopz - E-Commerce Platform
+# Me-Shopz - E-Commerce Platform (Next.js App)
 
-A full-stack e-commerce web application that enables shopkeepers to list, manage, and sell products online, while customers can browse, purchase, and track orders.
+This is the Next.js 16 application for Me-Shopz. The app has been migrated from TypeScript to JavaScript using `.jsx` pages and `next.config.js`.
 
 ## Features
 
@@ -40,66 +40,68 @@ A full-stack e-commerce web application that enables shopkeepers to list, manage
 - **Validation:** express-validator
 
 ### Frontend
-- **HTML5** - Semantic markup
-- **CSS3** - Modern styling with CSS variables
-- **Vanilla JavaScript** - DOM manipulation, Fetch API
-- **Mobile-first** responsive design
+- **Next.js 16** using JavaScript (`.jsx`)
+- **React 19**
+- **Tailwind CSS 4**
+- **Lucide React** icons
 
-## Project Structure
+## Project Structure (app dir)
 
 ```
-me-shopz/
-├── backend/
-│   ├── config/
-│   │   └── database.js
-│   ├── controllers/
-│   │   ├── authController.js
-│   │   ├── productController.js
-│   │   ├── cartController.js
-│   │   └── orderController.js
-│   ├── middleware/
-│   │   ├── auth.js
-│   │   ├── errorHandler.js
-│   │   ├── upload.js
-│   │   ├── rateLimiter.js
-│   │   ├── validator.js
-│   │   └── securityHeaders.js
-│   ├── models/
-│   │   ├── User.js
-│   │   ├── Product.js
-│   │   ├── Cart.js
-│   │   └── Order.js
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── productRoutes.js
-│   │   ├── cartRoutes.js
-│   │   └── orderRoutes.js
-│   ├── utils/
-│   │   └── createDirectory.js
-│   ├── uploads/
-│   │   └── products/
-│   ├── .env.example
-│   ├── .gitignore
-│   ├── package.json
-│   └── server.js
-├── frontend/
-│   ├── css/
-│   │   └── styles.css
-│   ├── js/
-│   │   ├── config.js
-│   │   ├── auth.js
-│   │   ├── api.js
-│   │   ├── home.js
-│   │   ├── login.js
-│   │   ├── signup.js
-│   │   ├── cart.js
-│   │   └── dashboard.js
-│   ├── index.html
-│   ├── login.html
-│   ├── signup.html
-│   ├── cart.html
-│   └── dashboard.html
-└── README.md
+my-app/
+├── app/
+│   ├── page.jsx
+│   ├── layout.jsx
+│   ├── login/page.jsx
+│   ├── signup/page.jsx
+│   ├── dashboard/page.jsx
+│   ├── products/page.jsx
+│   ├── products/[id]/page.jsx
+│   ├── cart/page.jsx
+│   ├── orders/page.jsx
+│   └── shopkeeper/products/page.jsx
+├── lib/utils.js
+├── next.config.js
+├── public/
+└── package.json
+```
+
+## Run the App
+
+1) Start the backend API (port 5000):
+
+```bash
+cd my-app/backend
+npm install
+npm run dev
+```
+
+2) Start the Next.js dev server:
+
+```bash
+cd my-app
+npm install
+npm run dev
+```
+
+- The dev server prints the exact URL. It defaults to `http://localhost:3000`; if that port is busy, Next.js will pick another (e.g., `http://localhost:3001`).
+- The app calls the backend at `http://localhost:5000`.
+
+## Recent Changes
+
+- Converted all `.ts`/`.tsx` files to JavaScript `.jsx` pages.
+- Replaced `next.config.ts` with `next.config.js`.
+- Moved shared utility to `lib/utils.js`.
+- Updated legacy HTML pages that loaded `lib/utils.ts` to `lib/utils.js`.
+
+## Troubleshooting
+
+- If you see "Failed to fetch" on login/signup:
+   - Ensure the backend is running at `http://localhost:5000`.
+   - Open the exact frontend URL printed by `npm run dev` (3000 or 3001).
+   - CORS is preconfigured to allow `http://localhost:3000` and `http://localhost:3001`.
+- If Next.js warns about multiple lockfiles/workspace root:
+   - Keep a single `package-lock.json` at the intended root, or set `turbopack.root` in `next.config.js`.
 ```
 
 ## Installation & Setup
@@ -149,38 +151,35 @@ npm start
 
 Server will run on `http://localhost:5000`
 
-### Frontend Setup
+### Run the Next.js App
 
-1. **Navigate to frontend directory:**
 ```bash
-cd frontend
+cd my-app
+npm install
+npm run dev
 ```
 
-2. **Update API configuration:**
-Open `js/config.js` and ensure `API_BASE_URL` points to your backend:
-```javascript
-const API_BASE_URL = "http://localhost:5000/api"
-```
+The dev server prints the exact URL. It defaults to `http://localhost:3000`; if that port is in use, it will pick another (e.g., `http://localhost:3001`).
 
-3. **Serve the frontend:**
+### Backend API
 
-**Option 1: Using Python:**
+The app expects the backend at `http://localhost:5000`. Make sure it’s running:
+
 ```bash
-# Python 3
-python -m http.server 3000
-
-# Python 2
-python -m SimpleHTTPServer 3000
+cd my-app/backend
+npm install
+npm run dev
 ```
 
-**Option 2: Using Node.js http-server:**
-```bash
-npx http-server -p 3000
-```
+### CORS & "Failed to fetch"
+- CORS is configured to allow `http://localhost:3000` and `http://localhost:3001`.
+- Ensure you open the URL shown by the Next.js dev server.
+- Verify the backend health at `http://localhost:5000/api/health`.
 
-**Option 3: Using VS Code Live Server extension**
-
-Frontend will run on `http://localhost:3000`
+### Notes
+- Utilities were migrated to `lib/utils.js` and references in legacy HTML updated.
+- Config moved to `next.config.js`.
+- TypeScript files were replaced by `.jsx` pages.
 
 ## API Endpoints
 

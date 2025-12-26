@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -29,11 +29,11 @@ export default function LoginPage() {
       const data = await response.json();
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
-      
-      // Redirect to dashboard
+
       window.location.href = "/dashboard";
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
     } finally {
       setLoading(false);
     }

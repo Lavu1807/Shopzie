@@ -4,27 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface CartItem {
-  _id: string;
-  product: {
-    _id: string;
-    name: string;
-    price: number;
-    stock: number;
-    images?: string[];
-  };
-  quantity: number;
-}
-
-interface Cart {
-  items: CartItem[];
-  totalItems: number;
-  totalPrice: number;
-}
-
 export default function CartPage() {
   const router = useRouter();
-  const [cart, setCart] = useState<Cart | null>(null);
+  const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -34,7 +16,7 @@ export default function CartPage() {
 
   const fetchCart = async () => {
     const token = localStorage.getItem("accessToken");
-    
+
     if (!token) {
       router.push("/login");
       return;
@@ -53,14 +35,15 @@ export default function CartPage() {
 
       const data = await response.json();
       setCart(data.cart);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to fetch cart";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateQuantity = async (productId: string, quantity: number) => {
+  const updateQuantity = async (productId, quantity) => {
     const token = localStorage.getItem("accessToken");
 
     try {
@@ -78,12 +61,13 @@ export default function CartPage() {
       }
 
       await fetchCart();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to update quantity";
+      alert(message);
     }
   };
 
-  const removeItem = async (productId: string) => {
+  const removeItem = async (productId) => {
     const token = localStorage.getItem("accessToken");
 
     try {
@@ -99,8 +83,9 @@ export default function CartPage() {
       }
 
       await fetchCart();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to remove item";
+      alert(message);
     }
   };
 
@@ -124,8 +109,9 @@ export default function CartPage() {
       }
 
       await fetchCart();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to clear cart";
+      alert(message);
     }
   };
 

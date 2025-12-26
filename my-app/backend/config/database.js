@@ -9,8 +9,9 @@ const connectDB = async () => {
 
     console.log(`MongoDB Connected: ${conn.connection.host}`)
   } catch (error) {
-    console.error(`Error: ${error.message}`)
-    process.exit(1)
+    console.error(`Error connecting to MongoDB: ${error.message}`)
+    // Rethrow so caller can decide to fallback to in-memory DB
+    throw error
   }
 }
 

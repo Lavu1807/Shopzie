@@ -4,27 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  stock: number;
-  images?: string[];
-  shopkeeper: {
-    _id: string;
-    name: string;
-  };
-  createdAt: string;
-}
-
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const productId = params.id as string;
-  
-  const [product, setProduct] = useState<Product | null>(null);
+  const productId = params?.id;
+
+  const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -38,15 +23,16 @@ export default function ProductDetailPage() {
   const fetchProduct = async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/products/${productId}`);
-      
+
       if (!response.ok) {
         throw new Error("Product not found");
       }
 
       const data = await response.json();
       setProduct(data.product);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Product not found";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -54,7 +40,7 @@ export default function ProductDetailPage() {
 
   const addToCart = async () => {
     const token = localStorage.getItem("accessToken");
-    
+
     if (!token) {
       router.push("/login");
       return;
@@ -79,8 +65,9 @@ export default function ProductDetailPage() {
 
       alert(`${quantity} item(s) added to cart!`);
       router.push("/cart");
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to add to cart";
+      alert(message);
     }
   };
 
@@ -211,7 +198,7 @@ export default function ProductDetailPage() {
                       min="1"
                       max={product.stock}
                       value={quantity}
-                      onChange={(e) => setQuantity(Math.min(product.stock, Math.max(1, parseInt(e.target.value) || 1)))}
+                      onChange={(e) => setQuantity(Math.min(product.stock, Math.max(1, parseInt(e.target.value, 10) || 1)))}
                       className="w-20 text-center px-4 py-2 border border-gray-300 rounded-lg font-semibold text-xl"
                     />
                     <button

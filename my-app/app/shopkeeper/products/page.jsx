@@ -4,25 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  stock: number;
-  images?: string[];
-}
-
 export default function ShopkeeperProductsPage() {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  
-  // Form state
+  const [editingProduct, setEditingProduct] = useState(null);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -37,13 +26,12 @@ export default function ShopkeeperProductsPage() {
 
   const checkAuthAndFetchProducts = async () => {
     const token = localStorage.getItem("accessToken");
-    
+
     if (!token) {
       router.push("/login");
       return;
     }
 
-    // Check if user is a shopkeeper
     try {
       const meResponse = await fetch("http://localhost:5000/api/auth/me", {
         headers: {
@@ -56,17 +44,17 @@ export default function ShopkeeperProductsPage() {
       }
 
       const meData = await meResponse.json();
-      
+
       if (meData.user.role !== "shopkeeper") {
         alert("Access denied. Only shopkeepers can access this page.");
         router.push("/dashboard");
         return;
       }
 
-      // Fetch shopkeeper's products
       await fetchProducts();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Authentication failed";
+      setError(message);
       router.push("/login");
     }
   };
@@ -87,14 +75,15 @@ export default function ShopkeeperProductsPage() {
 
       const data = await response.json();
       setProducts(data.products || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to fetch products";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("accessToken");
 
@@ -102,7 +91,7 @@ export default function ShopkeeperProductsPage() {
       const url = editingProduct
         ? `http://localhost:5000/api/products/${editingProduct._id}`
         : "http://localhost:5000/api/products";
-      
+
       const method = editingProduct ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -114,7 +103,7 @@ export default function ShopkeeperProductsPage() {
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
-          stock: parseInt(formData.stock),
+          stock: parseInt(formData.stock, 10),
         }),
       });
 
@@ -127,12 +116,13 @@ export default function ShopkeeperProductsPage() {
       setEditingProduct(null);
       setFormData({ name: "", description: "", price: "", category: "", stock: "" });
       await fetchProducts();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save product";
+      alert(message);
     }
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
@@ -144,7 +134,7 @@ export default function ShopkeeperProductsPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (productId: string) => {
+  const handleDelete = async (productId) => {
     if (!confirm("Are you sure you want to delete this product?")) {
       return;
     }
@@ -164,8 +154,9 @@ export default function ShopkeeperProductsPage() {
       }
 
       await fetchProducts();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to delete product";
+      alert(message);
     }
   };
 
@@ -344,7 +335,7 @@ export default function ShopkeeperProductsPage() {
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
                   <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
-                  
+
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-2xl font-bold text-indigo-600">
                       ${product.price.toFixed(2)}

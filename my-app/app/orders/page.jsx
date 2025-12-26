@@ -4,36 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface OrderItem {
-  product: string;
-  productName: string;
-  quantity: number;
-  price: number;
-  shopkeeper: string;
-}
-
-interface Order {
-  _id: string;
-  orderNumber: string;
-  items: OrderItem[];
-  totalAmount: number;
-  totalItems: number;
-  orderStatus: string;
-  paymentStatus: string;
-  paymentMethod: string;
-  shippingAddress: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  createdAt: string;
-}
-
 export default function OrdersPage() {
   const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -43,7 +16,7 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     const token = localStorage.getItem("accessToken");
-    
+
     if (!token) {
       router.push("/login");
       return;
@@ -62,8 +35,9 @@ export default function OrdersPage() {
 
       const data = await response.json();
       setOrders(data.orders || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to fetch orders";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -75,8 +49,9 @@ export default function OrdersPage() {
     router.push("/");
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status) => {
+    const safeStatus = typeof status === "string" ? status.toLowerCase() : "";
+    switch (safeStatus) {
       case "pending":
         return "bg-yellow-100 text-yellow-800";
       case "processing":
